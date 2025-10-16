@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ToolsyHub - Alqudimi Technology{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <a href="{{ url_for('index') }}">
+                    <i class="fas fa-tools"></i>
+                    <span>ToolsyHub</span>
+                </a>
+            </div>
+            <div class="nav-actions">
+                {% if current_user.is_authenticated %}
+                    <span class="user-info">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="username">{{ current_user.username }}</span>
+                    </span>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn-nav-login">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Login</span>
+                    </a>
+                {% endif %}
+                <button class="menu-toggle" id="menuToggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="side-menu" id="sideMenu">
+        <div class="side-menu-header">
+            <h3>Menu</h3>
+            <button class="close-menu" id="closeMenu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="side-menu-content">
+            <div class="menu-section">
+                <h4>Navigation</h4>
+                <a href="{{ url_for('index') }}" class="menu-item">
+                    <i class="fas fa-home"></i>
+                    <span>Home</span>
+                </a>
+                <a href="{{ url_for('browse') }}" class="menu-item">
+                    <i class="fas fa-search"></i>
+                    <span>Browse Tools</span>
+                </a>
+                <a href="{{ url_for('contributors') }}" class="menu-item">
+                    <i class="fas fa-trophy"></i>
+                    <span>Contributors</span>
+                </a>
+            </div>
+            
+            {% if current_user.is_authenticated %}
+            <div class="menu-section">
+                <h4>Your Tools</h4>
+                <a href="{{ url_for('add_tool') }}" class="menu-item">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Add Tool</span>
+                </a>
+                <a href="{{ url_for('my_contributions') }}" class="menu-item">
+                    <i class="fas fa-folder-open"></i>
+                    <span>My Contributions</span>
+                </a>
+            </div>
+            
+            {% if current_user.is_admin %}
+            <div class="menu-section">
+                <h4>Admin</h4>
+                <a href="{{ url_for('approve_tools') }}" class="menu-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Approve Tools</span>
+                </a>
+            </div>
+            {% endif %}
+            
+            <div class="menu-section">
+                <a href="{{ url_for('logout') }}" class="menu-item logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+            {% else %}
+            <div class="menu-section">
+                <h4>Account</h4>
+                <a href="{{ url_for('login') }}" class="menu-item">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </a>
+                <a href="{{ url_for('register') }}" class="menu-item">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Register</span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                        <button class="close-alert">&times;</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 ToolsyHub - Alqudimi Technology. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Tool - ToolsyHub{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Add New Tool</h1>
+        <p>Share your favorite developer tool with the community</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="form-container">
+        <form method="POST" action="{{ url_for('add_tool') }}" class="tool-form">
+            <div class="form-group">
+                <label for="name">Tool Name *</label>
+                <input type="text" id="name" name="name" required placeholder="e.g., Visual Studio Code">
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description *</label>
+                <textarea id="description" name="description" required rows="4" placeholder="Describe what this tool does and why it's useful"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="link">Tool URL *</label>
+                <input type="url" id="link" name="link" required placeholder="https://example.com">
+                <small>We'll automatically verify that this link works</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="category_id">Category *</label>
+                <select id="category_id" name="category_id" required>
+                    <option value="">Select a category</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Submit Tool</button>
+                <a href="{{ url_for('index') }}" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

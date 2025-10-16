@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Approve Tools - ToolsyHub{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Pending Approvals</h1>
+        <p>Review and approve tools submitted by the community</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="pending-tools">
+        {% for tool in tools %}
+        <div class="pending-tool-card">
+            <div class="tool-details">
+                <h3>{{ tool.name }}</h3>
+                <p>{{ tool.description }}</p>
+                <div class="tool-info">
+                    <span><i class="fas fa-folder"></i> {{ tool.category.name }}</span>
+                    <span><i class="fas fa-user"></i> {{ tool.contributor.username }}</span>
+                    <span><i class="fas fa-calendar"></i> {{ tool.created_at.strftime('%b %d, %Y') }}</span>
+                    <a href="{{ tool.link }}" target="_blank"><i class="fas fa-link"></i> {{ tool.link }}</a>
+                </div>
+            </div>
+            <div class="tool-actions">
+                <form method="POST" action="{{ url_for('approve_tool', tool_id=tool.id) }}" style="display: inline;">
+                    <button type="submit" class="btn-approve">
+                        <i class="fas fa-check"></i> Approve
+                    </button>
+                </form>
+                <form method="POST" action="{{ url_for('reject_tool', tool_id=tool.id) }}" style="display: inline;">
+                    <button type="submit" class="btn-reject" onclick="return confirm('Are you sure you want to reject this tool?')">
+                        <i class="fas fa-times"></i> Reject
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="no-pending">
+            <i class="fas fa-check-circle"></i>
+            <h3>All caught up!</h3>
+            <p>No tools pending approval at this time</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Tools - ToolsyHub{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Browse Developer Tools</h1>
+        <p>Explore our collection of {{ tools|length }} tools</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="filters">
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Search tools..." value="{{ request.args.get('search', '') }}">
+            <button id="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+        <div class="category-filters">
+            <a href="{{ url_for('browse') }}" class="filter-btn {% if not selected_category %}active{% endif %}">All</a>
+            {% for category in categories %}
+            <a href="{{ url_for('browse', category=category.id) }}" class="filter-btn {% if selected_category == category.id|string %}active{% endif %}">
+                {{ category.name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="tools-grid">
+        {% for tool in tools %}
+        <div class="tool-card">
+            <div class="tool-icon">
+                <i class="fas fa-{{ loop.index % 5 == 0 and 'code' or loop.index % 4 == 0 and 'database' or loop.index % 3 == 0 and 'palette' or loop.index % 2 == 0 and 'rocket' or 'laptop-code' }}"></i>
+            </div>
+            <h3>{{ tool.name }}</h3>
+            <p>{{ tool.description }}</p>
+            <div class="tool-meta">
+                <span class="category">{{ tool.category.name }}</span>
+                <span class="contributor">by {{ tool.contributor.username }}</span>
+            </div>
+            <a href="{{ tool.link }}" target="_blank" class="tool-link">
+                Visit Tool <i class="fas fa-external-link-alt"></i>
+            </a>
+        </div>
+        {% else %}
+        <div class="no-results">
+            <i class="fas fa-search"></i>
+            <h3>No tools found</h3>
+            <p>Try adjusting your search or filters</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let searchTimeout;
+let currentCategory = '{{ selected_category or "" }}';
+
+function performSearch() {
+    const query = document.getElementById('search-input').value;
+    const params = new URLSearchParams();
+    
+    if (query) {
+        params.set('q', query);
+    }
+    if (currentCategory) {
+        params.set('category', currentCategory);
+    }
+    
+    fetch(`/search?${params.toString()}`)
+        .then(response => response.json())
+        .then(tools => {
+            const grid = document.querySelector('.tools-grid');
+            
+            if (tools.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-results" style="grid-column: 1/-1;">
+                        <i class="fas fa-search"></i>
+                        <h3>No tools found</h3>
+                        <p>Try adjusting your search or filters</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const icons = ['laptop-code', 'rocket', 'palette', 'database', 'code'];
+            grid.innerHTML = tools.map((tool, index) => `
+                <div class="tool-card">
+                    <div class="tool-icon">
+                        <i class="fas fa-${icons[index % icons.length]}"></i>
+                    </div>
+                    <h3>${tool.name}</h3>
+                    <p>${tool.description}</p>
+                    <div class="tool-meta">
+                        <span class="category">${tool.category}</span>
+                        <span class="contributor">by ${tool.contributor}</span>
+                    </div>
+                    <a href="${tool.link}" target="_blank" class="tool-link">
+                        Visit Tool <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            `).join('');
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+        });
+}
+
+document.getElementById('search-btn').addEventListener('click', performSearch);
+
+document.getElementById('search-input').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(performSearch, 300);
+});
+
+document.getElementById('search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        performSearch();
+    }
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const url = new URL(this.href);
+        currentCategory = url.searchParams.get('category') || '';
+        
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        performSearch();
+    });
+});
+</script>
+{% endblock %}

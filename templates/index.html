@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero">
+    <div class="container">
+        <h1>Discover the Best Developer Tools</h1>
+        <p>A curated collection of tools, platforms, and resources to boost your development productivity</p>
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Search for tools, platforms, or resources...">
+            <button id="search-btn"><i class="fas fa-search"></i></button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="section-header">
+        <h2>Featured Tools</h2>
+        <a href="{{ url_for('browse') }}" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+    </div>
+
+    <div class="tools-grid" id="tools-grid">
+        {% for tool in tools[:8] %}
+        <div class="tool-card">
+            <div class="tool-icon">
+                <i class="fas fa-{{ loop.index % 5 == 0 and 'code' or loop.index % 4 == 0 and 'database' or loop.index % 3 == 0 and 'palette' or loop.index % 2 == 0 and 'rocket' or 'laptop-code' }}"></i>
+            </div>
+            <h3>{{ tool.name }}</h3>
+            <p>{{ tool.description }}</p>
+            <div class="tool-meta">
+                <span class="category">{{ tool.category.name }}</span>
+                <span class="contributor">by {{ tool.contributor.username }}</span>
+            </div>
+            <a href="{{ tool.link }}" target="_blank" class="tool-link">
+                Visit Tool <i class="fas fa-external-link-alt"></i>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if current_user.is_authenticated %}
+    <div class="cta-section">
+        <h2>Have a tool to share?</h2>
+        <p>Help the community by adding your favorite developer tools</p>
+        <a href="{{ url_for('add_tool') }}" class="btn-large">Add Your Tool</a>
+    </div>
+    {% else %}
+    <div class="cta-section">
+        <h2>Join our community</h2>
+        <p>Register to contribute and help developers discover amazing tools</p>
+        <a href="{{ url_for('register') }}" class="btn-large">Get Started</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let searchTimeout;
+
+function performSearch() {
+    const query = document.getElementById('search-input').value;
+    
+    if (!query) {
+        return;
+    }
+    
+    fetch(`/search?q=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(tools => {
+            const grid = document.getElementById('tools-grid');
+            
+            if (tools.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-results" style="grid-column: 1/-1;">
+                        <i class="fas fa-search"></i>
+                        <h3>No tools found</h3>
+                        <p>Try a different search term</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const icons = ['laptop-code', 'rocket', 'palette', 'database', 'code'];
+            grid.innerHTML = tools.map((tool, index) => `
+                <div class="tool-card">
+                    <div class="tool-icon">
+                        <i class="fas fa-${icons[index % icons.length]}"></i>
+                    </div>
+                    <h3>${tool.name}</h3>
+                    <p>${tool.description}</p>
+                    <div class="tool-meta">
+                        <span class="category">${tool.category}</span>
+                        <span class="contributor">by ${tool.contributor}</span>
+                    </div>
+                    <a href="${tool.link}" target="_blank" class="tool-link">
+                        Visit Tool <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            `).join('');
+        })
+        .catch(error => {
+            console.error('Search error:', error);
+        });
+}
+
+document.getElementById('search-btn').addEventListener('click', performSearch);
+
+document.getElementById('search-input').addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(performSearch, 300);
+});
+
+document.getElementById('search-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        performSearch();
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Contributors - ToolsyHub{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>Top Contributors</h1>
+        <p>Celebrating our community members who help developers discover amazing tools</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="leaderboard">
+        {% for stat in user_stats %}
+        <div class="contributor-card {% if loop.index == 1 %}gold{% elif loop.index == 2 %}silver{% elif loop.index == 3 %}bronze{% endif %}">
+            <div class="rank">
+                {% if loop.index == 1 %}
+                    <i class="fas fa-trophy gold"></i>
+                {% elif loop.index == 2 %}
+                    <i class="fas fa-trophy silver"></i>
+                {% elif loop.index == 3 %}
+                    <i class="fas fa-trophy bronze"></i>
+                {% else %}
+                    {{ loop.index }}
+                {% endif %}
+            </div>
+            <div class="contributor-info">
+                <h3>{{ stat.user.username }}</h3>
+                <p>Member since {{ stat.user.created_at.strftime('%B %Y') }}</p>
+            </div>
+            <div class="contributor-stats">
+                <div class="stat">
+                    <span class="stat-value">{{ stat.approved_count }}</span>
+                    <span class="stat-label">Approved</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{ stat.pending_count }}</span>
+                    <span class="stat-label">Pending</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{ stat.total_count }}</span>
+                    <span class="stat-label">Total</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

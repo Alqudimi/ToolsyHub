@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}My Contributions - ToolsyHub{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <h1>My Contributions</h1>
+        <p>Track your submitted tools and their approval status</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="contributions-list">
+        {% for tool in tools %}
+        <div class="contribution-item {% if tool.is_approved %}approved{% else %}pending{% endif %}">
+            <div class="contribution-header">
+                <h3>{{ tool.name }}</h3>
+                <span class="status-badge">
+                    {% if tool.is_approved %}
+                        <i class="fas fa-check-circle"></i> Approved
+                    {% else %}
+                        <i class="fas fa-clock"></i> Pending Review
+                    {% endif %}
+                </span>
+            </div>
+            <p>{{ tool.description }}</p>
+            <div class="contribution-meta">
+                <span><i class="fas fa-folder"></i> {{ tool.category.name }}</span>
+                <span><i class="fas fa-calendar"></i> {{ tool.created_at.strftime('%b %d, %Y') }}</span>
+                <a href="{{ tool.link }}" target="_blank"><i class="fas fa-external-link-alt"></i> {{ tool.link }}</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="no-contributions">
+            <i class="fas fa-inbox"></i>
+            <h3>No contributions yet</h3>
+            <p>Start sharing your favorite tools with the community</p>
+            <a href="{{ url_for('add_tool') }}" class="btn-primary">Add Your First Tool</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
