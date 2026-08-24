@@ -1,12 +1,21 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+
+import pandas as pd
 import requests
 import validators
-import pandas as pd
-from models import db, User, Tool, Category,get_category_id,add_tools
+from flask import Flask, flash, jsonify, redirect, render_template, request, url_for
+from flask_login import (
+    LoginManager,
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from models import Category, Tool, User, add_tools, db, get_category_id
+from security import require_admin_password
+
 categories_dict = {
     'AI Tools & Platforms': 'Artificial intelligence development tools, machine learning platforms, and AI services for building intelligent applications.',
     'APIs & Web Services': 'Web APIs and services that allow applications to communicate and exchange data with external systems.',
@@ -130,11 +139,11 @@ def validate_url(url):
     try:
         response = requests.head(url, timeout=5, allow_redirects=True)
         return response.status_code < 400
-    except:
+    except requests.RequestException:
         try:
             response = requests.get(url, timeout=5, allow_redirects=True)
             return response.status_code < 400
-        except:
+        except requests.RequestException:
             return False
 
 @app.route('/')
@@ -375,10 +384,11 @@ def init_db():
             db.session.commit()
         
         if User.query.count() == 0:
+            admin_password = require_admin_password()
             admin = User(
                 username='admin',
                 email='admin@alqudimi.tech',
-                password_hash=generate_password_hash('admin123'),
+                password_hash=generate_password_hash(admin_password),
                 is_admin=True
             )
             db.session.add(admin)
