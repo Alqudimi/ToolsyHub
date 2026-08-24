@@ -139,10 +139,14 @@ Database Support
 
 👨‍💻 Admin Features
 
-Default admin account:
+Initial administrator setup:
 
-· Username: admin
-· Password: admin123
+Set `ADMIN_PASSWORD` in the process environment before the first startup. The application creates the initial `admin` account from that value and does not ship with a default password.
+
+```bash
+export ADMIN_PASSWORD='choose-a-unique-password'
+python app.py
+```
 
 Admin Capabilities:
 
